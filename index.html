@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HKDSE ICT SQL LAB // 互動執行拆解與正規化實驗室</title>
+  <title>ICT - SQL // 互動執行拆解與正規化實驗室</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
@@ -241,10 +241,10 @@
         </button>
         <button id="brandHomeBtn" class="flex items-center gap-2 text-left">
           <span class="px-2.5 py-1 rounded-sm bg-[#ff2e88] text-white font-display font-bold text-xs sm:text-sm tracking-wider shadow-[0_0_16px_rgba(255,46,136,0.4)] whitespace-nowrap">
-            HKDSE ICT SQL LAB
+            ICT - SQL
           </span>
           <span class="hidden xl:inline-block font-mono-code text-[11px] text-[#9aa7b8]">
-            UNIT A + ELECTIVE 2A // SQL + ERD + 3NF
+            必修 A + 選修 A
           </span>
         </button>
       </div>
@@ -258,7 +258,7 @@
             闖關練習
           </button>
           <button id="modeBlockBtn" class="px-2.5 py-1 rounded-[2px] text-[#9aa7b8] hover:text-white transition whitespace-nowrap">
-            SQL 積木遊戲
+            遊戲快打
           </button>
           <button id="modeNormBtn" class="px-2.5 py-1 rounded-[2px] text-[#9aa7b8] hover:text-white transition whitespace-nowrap">
             正規化 1NF–3NF
@@ -270,10 +270,7 @@
       </div>
 
       <div class="flex items-center gap-1.5 order-2 sm:order-3">
-        <button id="cmdPaletteBtn" class="hidden md:flex hw-btn items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-[#111720] hover:bg-[#192230] border border-[#263242] text-xs text-[#9aa7b8] hover:text-white" title="快速跳關／指令選單">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-[#00e5ff]"></i>
-          <span class="hidden xl:inline">快速指令</span><span class="kbd-cap">⌘K</span>
-        </button>
+
 
         <button id="studentProfileBtn" class="hw-btn px-2 py-1.5 rounded-sm bg-[#111b27] hover:bg-[#1a2838] text-[#00e5ff] border border-[#00e5ff]/40 text-xs font-bold flex items-center gap-1 whitespace-nowrap" title="學生登入／切換帳號／匯出進度">
           <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
@@ -300,7 +297,7 @@
       <div class="p-4 border-b border-[#212a36] space-y-3">
         <div class="flex items-start justify-between gap-2">
           <div>
-            <div class="font-mono-code text-[10px] tracking-widest text-[#64748b] uppercase">SCORE // 進度自動儲存</div>
+            <div class="font-mono-code text-[10px] tracking-widest text-[#64748b] uppercase">學習進度與得分</div>
             <div class="mt-1 flex items-baseline gap-1.5">
               <span id="xpReadout" class="font-mono-code text-2xl font-bold text-[#f5a623] leading-none">0</span>
               <span class="font-mono-code text-[10px] text-[#64748b]">分</span>
@@ -330,7 +327,7 @@
 
         <div>
           <div class="flex justify-between font-mono-code text-[10px] text-[#64748b] mb-1">
-            <span>SPECTRUM</span>
+            <span>各課進度</span>
             <span id="completedCountText" class="text-[#cbd5e1]">0 / 80 題</span>
           </div>
           <div id="paletteBar" class="grid gap-[2px] h-2 bg-[#06080c] p-[2px] border border-[#212a36]" style="grid-template-columns: repeat(8, minmax(0, 1fr));"></div>
@@ -339,17 +336,15 @@
         <div class="flex items-center justify-between pt-1 border-t border-[#18202b]">
           <span id="engineStatus" class="flex items-center gap-1.5 text-[#f5a623] font-mono-code text-[10px]">
             <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
-            INIT SQLITE WASM...
+            載入資料庫引擎中...
           </span>
-          <button id="resetProgressBtn" class="font-mono-code text-[10px] text-[#64748b] hover:text-[#ff2e88] uppercase tracking-wider transition">
-            重設進度
-          </button>
+<span class="font-mono-code text-[10px] text-[#64748b]">每課 10/10 過關</span>
         </div>
       </div>
 
       <div class="p-3 flex-1 overflow-y-auto">
         <div class="flex items-center justify-between px-1.5 pb-2 mb-2 border-b border-[#18202b]">
-          <h2 class="font-mono-code text-[10px] font-bold tracking-widest text-[#9aa7b8] uppercase">C&amp;A GUIDE SYLLABUS</h2>
+          <h2 class="font-mono-code text-[10px] font-bold tracking-widest text-[#9aa7b8] uppercase">課程課題</h2>
           <span class="text-[10px] text-[#ff2e88] font-bold">8 課・80 題</span>
         </div>
         <div id="chapterList" class="space-y-3"></div>
@@ -357,7 +352,7 @@
     </aside>
 
     <!-- Right Main Workbench -->
-    <main class="lg:col-span-9 flex flex-col divide-y divide-[#212a36]">
+    <main id="mainWorkbench" class="lg:col-span-12 flex flex-col divide-y divide-[#212a36]">
 
 
       <!-- ===================================================================== -->
@@ -365,38 +360,36 @@
       <!-- ===================================================================== -->
       <div id="homeContainer" class="divide-y divide-[#212a36]">
 
-        <!-- Hero Banner (Codédex-style Course Entry) -->
+        <!-- Hero Banner -->
         <section class="p-5 sm:p-7 bg-gradient-to-br from-[#0e1522] via-[#0b1018] to-[#130d19]">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-2 max-w-2xl">
               <div class="flex flex-wrap items-center gap-2 font-mono-code text-[11px]">
-                <span class="px-2 py-0.5 rounded-sm bg-[#00e5ff]/15 text-[#00e5ff] border border-[#00e5ff]/35 font-bold">HKDSE ICT 2025+</span>
+                <span class="px-2 py-0.5 rounded-sm bg-[#00e5ff]/15 text-[#00e5ff] border border-[#00e5ff]/35 font-bold">必修 A + 選修 A</span>
                 <span class="px-2 py-0.5 rounded-sm bg-[#10d981]/15 text-[#10d981] border border-[#10d981]/35 font-bold">8 大課題・80 題實戰</span>
-                <span class="px-2 py-0.5 rounded-sm bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/35 font-bold">SQLITE WASM 即時執行</span>
               </div>
               <h1 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
-                互動式 HKDSE SQL、ERD 與正規化學習平台
+                ICT - SQL
               </h1>
               <p class="text-xs sm:text-sm text-[#cbd5e1] leading-relaxed">
-                結合 <b>Codédex</b> 闖關路線、<b>SQLite</b> 官方語法鐵路圖與 <b>SQLMaxx</b> 限時積木操練。全部說明以繁體中文呈現，資料庫結構與語句 100% 英文標準 SQL-92；每課完成 10/10 題即解鎖下一課！
+                完全對齊明德課本順序必修 A + 選修 A + 課本例題 / 練習題庫，符合教育局官方辭彙。瀏覽器內直接運行 SQL 語句。
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
               <button id="homeContinueQuestBtn" class="hw-btn hw-btn-primary px-5 py-2.5 rounded-sm text-sm font-bold flex items-center gap-2">
-                <i data-lucide="play" class="w-4 h-4"></i> <span id="homeContinueLabel">開始第 1 課闖關</span>
+                <i data-lucide="play" class="w-4 h-4"></i> <span id="homeContinueLabel">開始第 1 課練習</span>
               </button>
               <button id="homeLaunchBlockBtn" class="hw-btn hw-btn-cyan px-4 py-2.5 rounded-sm text-sm font-bold flex items-center gap-1.5">
-                <i data-lucide="gamepad-2" class="w-4 h-4"></i> 玩 SQL 積木遊戲
+                <i data-lucide="gamepad-2" class="w-4 h-4"></i> 遊戲快打
               </button>
             </div>
           </div>
         </section>
 
-        <!-- SQLite.org-inspired Interactive SELECT Syntax Railroad Diagram -->
+        <!-- Interactive SELECT Syntax Railroad Diagram -->
         <section class="p-4 sm:p-6 bg-[#0b0f15]/90 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <div class="font-mono-code text-[10px] tracking-widest text-[#00e5ff] uppercase font-bold">SQLITE.ORG STYLE // SYNTAX RAILROAD DIAGRAM</div>
               <h2 class="font-display text-base sm:text-lg font-bold text-white">SELECT 語法鐵路圖（點擊每個節點查看 HKDSE 重點）</h2>
             </div>
             <span class="font-mono-code text-[10px] text-[#9aa7b8]">沿箭咀方向閱讀書寫語法</span>
@@ -451,15 +444,14 @@
             </svg>
           </div>
           <div id="rrInfoBox" class="border-l-2 border-[#00e5ff] bg-[#00e5ff]/8 px-3.5 py-2 text-xs text-[#cbd5e1]">
-            <b class="text-[#00e5ff]">提示：</b>點擊上方任何一個語法節點（例如 <code class="font-mono-code">FROM</code>、<code class="font-mono-code">WHERE</code>、<code class="font-mono-code">GROUP/HAV</code>），即可睇到對應 HKDSE 重點並聯動下方執行次序演示！
+            <b class="text-[#00e5ff]">提示：</b>點擊上方任何一個語法節點（例如 <code class="font-mono-code">FROM</code>、<code class="font-mono-code">WHERE</code>、<code class="font-mono-code">GROUP/HAV</code>），即可查看對應 HKDSE 語法重點。
           </div>
         </section>
 
-        <!-- Codédex-inspired 8-Chapter Course Roadmap -->
+        <!-- 8-Chapter Course Roadmap -->
         <section class="p-4 sm:p-6 bg-[#0d1219]/90 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <div class="font-mono-code text-[10px] tracking-widest text-[#ff66a8] uppercase font-bold">CODÉDEX STYLE // CURRICULUM MAP</div>
               <h2 class="font-display text-base sm:text-lg font-bold text-white">8 大 HKDSE ICT SQL 課題進度地圖（每課 10 題：6 中等 + 4 困難）</h2>
             </div>
             <span class="text-xs text-[#9aa7b8]">答啱 10/10 自動解鎖下一課</span>
@@ -472,7 +464,7 @@
       <!-- ===================================================================== -->
       <!-- TOP STAGE (HOME ONLY): GREEN-BAR PAPER SQL LOGICAL ORDER              -->
       <!-- ===================================================================== -->
-      <section id="sqlPaperStage" class="p-4 sm:p-5 bg-[#0a0e14]/80">
+      <section id="sqlPaperStage" class="hidden p-4 sm:p-5 bg-[#0a0e14]/80">
         <div class="greenbar-paper rounded-sm overflow-hidden flex">
           <!-- Left Tractor Perforation Strip -->
           <div class="hidden sm:block w-6 shrink-0 tractor-strip border-r"></div>
@@ -565,12 +557,12 @@
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3 border-t border-[#1b2430]">
             <div class="md:col-span-6">
-              <div class="font-mono-code text-[10px] tracking-widest text-[#64748b] uppercase mb-1.5">CONCEPT BRIEF // 概念重點</div>
+              <div class="font-mono-code text-[10px] tracking-widest text-[#64748b] uppercase mb-1.5">概念重點</div>
               <div id="lvlConcept" class="concept-prose text-sm text-[#cbd5e1] leading-relaxed"></div>
             </div>
             <div class="md:col-span-6 md:pl-4 md:border-l md:border-[#1b2430]">
               <div class="font-mono-code text-[10px] tracking-widest text-[#ff2e88] uppercase font-bold mb-1.5 flex items-center gap-1.5">
-                <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> MISSION OBJECTIVE // 關卡任務
+                <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> 題目要求
               </div>
               <div id="lvlTask" class="task-prose text-sm sm:text-[15px] font-bold text-white leading-relaxed"></div>
             </div>
@@ -583,7 +575,7 @@
             <div class="flex items-center gap-2">
               <i data-lucide="database" class="w-4 h-4 text-[#00e5ff]"></i>
               <h2 class="text-xs sm:text-sm font-bold text-white tracking-wide">
-                資料表結構與數據 <span class="font-mono-code text-[#64748b] font-normal ml-1">// ENGLISH SCHEMA &amp; DATA</span>
+                資料表結構與數據
               </h2>
             </div>
             <div id="tableTabs" class="flex flex-wrap gap-1.5"></div>
@@ -619,8 +611,8 @@
 
           <div class="chassis-well rounded-sm overflow-hidden focus-within:border-[#00e5ff]">
             <div class="px-3 py-1 bg-[#0b0f15] border-b border-[#1b2430] flex items-center justify-between font-mono-code text-[10px] text-[#64748b]">
-              <span>QUERY_BUFFER.SQL</span>
-              <span>SQL-92 / HKDSE</span>
+              <span>SQL 輸入區</span>
+              <span>HKDSE SQL</span>
             </div>
             <textarea id="sqlInput" rows="5" spellcheck="false"
               class="sql-editor w-full bg-transparent p-3.5 text-sm font-mono-code text-[#e0f7ff] outline-none"
@@ -650,7 +642,7 @@
 <!-- Live User SQL Breakdown Drawer (shows when user runs/deconstructs their own query) -->
         <div id="userSqlBreakdownBar" class="hidden mt-3 chassis-surface rounded-sm p-3.5 border-l-2 border-l-[#00e5ff]">
           <div class="flex items-center justify-between mb-2">
-            <span class="font-mono-code text-[11px] font-bold text-[#00e5ff]">LIVE DECONSTRUCTOR // 你剛剛輸入嘅 SQL 執行拆解順序</span>
+            <span class="font-mono-code text-[11px] font-bold text-[#00e5ff]">你輸入嘅 SQL 執行次序拆解</span>
             <button id="closeBreakdownBtn" class="text-xs text-[#64748b] hover:text-white">收起</button>
           </div>
           <div id="userSqlBreakdownSteps" class="flex flex-wrap gap-2"></div>
@@ -711,7 +703,7 @@
               <span class="text-sm font-bold text-white">互動 HKDSE 官方 Chen Notation ERD 建模器</span>
             </div>
             <span class="font-mono-code text-[10px] px-2 py-0.5 rounded-sm bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30 font-semibold">
-              C&amp;A GUIDE P.41 STANDARD
+              HKDSE ERD 標準
             </span>
           </div>
 
@@ -823,7 +815,7 @@
       <section id="blockGameContainer" class="hidden p-4 sm:p-6 bg-[#0a0e14]/95 space-y-4">
         <div class="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-[#212a36]">
           <div>
-            <h2 class="font-display text-xl sm:text-2xl font-bold text-white">SQL 積木消消樂</h2>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-white">遊戲快打</h2>
             <p class="text-xs text-[#9aa7b8] mt-1">
               題目卡片由上方 3 條軌道掉落，在觸碰紅線前輸入正確 SQL 消除卡片。按 <span class="kbd-cap">Enter</span> 發射、<span class="kbd-cap">Tab</span> 換卡、<span class="kbd-cap">Esc</span> 暫停。
             </p>
@@ -1100,7 +1092,7 @@ ORDER BY s.SID ASC;</textarea>
     <div class="w-full max-w-md chassis-surface rounded-sm p-5 shadow-2xl space-y-4 border-[#324052]">
       <div class="flex items-center justify-between border-b border-[#212a36] pb-3">
         <div>
-          <div class="font-mono-code text-[10px] text-[#00e5ff] font-bold tracking-widest uppercase">STUDENT GMAIL LOGIN</div>
+          <div class="font-mono-code text-[10px] text-[#00e5ff] font-bold tracking-widest uppercase">學生登入</div>
           <h3 class="font-display text-lg font-bold text-white">學生 Gmail 登入</h3>
         </div>
         <button id="closeLoginModalBtn" class="hidden hw-btn p-1.5 rounded-sm bg-[#141b25] text-slate-300 border border-[#2a3647]" title="關閉">
@@ -2258,14 +2250,14 @@ ORDER BY s.SID ASC;</textarea>
           if (typeof initSqlJs !== 'function') break;
           state.SQL = await initSqlJs({ locateFile });
           state.sandboxDb = createFreshDb();
-          statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#10d981] shadow-[0_0_8px_#10d981]"></span> SQLITE WASM READY';
+          statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#10d981] shadow-[0_0_8px_#10d981]"></span> SQL 引擎已就緒';
           statusEl.className = 'flex items-center gap-1.5 text-[#10d981] font-mono-code text-[10px]';
           renderSchemaViewer();
           if (LEVELS[state.currentLevelIdx].type === 'predict') setupPredictTable(LEVELS[state.currentLevelIdx]);
           return;
         } catch (err) { /* try next */ }
       }
-      statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#f5a623]"></span> OFFLINE PREVIEW';
+      statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#f5a623]"></span> 離線預覽模式';
       statusEl.className = 'flex items-center gap-1.5 text-[#f5a623] font-mono-code text-[10px]';
     }
 
@@ -2588,7 +2580,7 @@ ORDER BY s.SID ASC;</textarea>
       } else if (lvl.type === 'erd') {
         document.getElementById('erdWorkspace').classList.remove('hidden');
         document.getElementById('erdScenarioBox').innerHTML =
-          '<div class="font-mono-code text-[10px] font-bold text-[#ff2e88] uppercase tracking-wider mb-1">SCENARIO // 題目情境</div>' +
+          '<div class="font-mono-code text-[10px] font-bold text-[#ff2e88] uppercase tracking-wider mb-1">題目情境</div>' +
           lvl.erdScenario.map((s) => `<div>${s}</div>`).join('');
         document.getElementById('erdFeedback').classList.add('hidden');
         document.getElementById('erdResolvedPreview').classList.add('hidden');
@@ -2915,12 +2907,30 @@ ORDER BY s.SID ASC;</textarea>
     function switchMode(mode) {
       if (state.mode === 'block' && mode !== 'block') pauseBlockGame(true);
       state.mode = mode;
+      const isQuest = mode === 'quest';
       document.getElementById('homeContainer').classList.toggle('hidden', mode !== 'home');
-      document.getElementById('sqlPaperStage').classList.toggle('hidden', mode !== 'home');
-      document.getElementById('questContainer').classList.toggle('hidden', mode !== 'quest');
+      document.getElementById('sqlPaperStage').classList.add('hidden');
+      document.getElementById('questContainer').classList.toggle('hidden', !isQuest);
       document.getElementById('blockGameContainer').classList.toggle('hidden', mode !== 'block');
       document.getElementById('normLabContainer').classList.toggle('hidden', mode !== 'norm');
       document.getElementById('sandboxContainer').classList.toggle('hidden', mode !== 'sandbox');
+
+      // Left chapter sidebar & mobile drawer button ONLY appear in 闖關練習 (quest) mode
+      const sidebar = document.getElementById('sidebarPanel');
+      const mainWb = document.getElementById('mainWorkbench');
+      const mobBtn = document.getElementById('mobileMenuBtn');
+      if (sidebar) {
+        sidebar.classList.toggle('lg:flex', isQuest);
+        sidebar.classList.add('hidden');
+      }
+      if (mainWb) {
+        mainWb.classList.toggle('lg:col-span-9', isQuest);
+        mainWb.classList.toggle('lg:col-span-12', !isQuest);
+      }
+      if (mobBtn) {
+        mobBtn.classList.toggle('hidden', !isQuest);
+        mobBtn.classList.toggle('lg:hidden', true);
+      }
 
       const styleBtn = (id, active, activeCls) => {
         const el = document.getElementById(id);
@@ -3023,7 +3033,7 @@ ORDER BY s.SID ASC;</textarea>
       const actions = [
         { tag: '3NF', label: '打開 互動正規化拆表實驗室 (RAW → 1NF → 2NF → 3NF)', run: () => switchMode('norm') },
         { tag: 'MODE', label: '切換至 自由 SQL 實驗室 (Sandbox)', run: () => switchMode('sandbox') },
-        { tag: 'GAME', label: '前往 SQL 積木消消樂（SQL Block Game）', run: () => switchMode('block') },
+        { tag: 'GAME', label: '前往 遊戲快打（SQL Block Game）', run: () => switchMode('block') },
         { tag: 'USER', label: '學生登入／切換帳號／匯出進度', run: () => openLoginModal() },
         { tag: 'REF', label: '打開 HKDSE 2025+ 官方 SQL & ERD 參考表', run: () => document.getElementById('refModal').classList.remove('hidden') },
         ...LEVELS.map((lvl, idx) => ({ tag: lvl.id, label: `${lvl.title} [${lvl.typeLabel}]`, sub: lvl.chName, run: () => { switchMode('quest'); loadLevel(idx); } }))
@@ -3046,7 +3056,7 @@ ORDER BY s.SID ASC;</textarea>
     // =========================================================================
     
     // =========================================================================
-    // 11B. SQL BLOCK GAME ENGINE (SQLMAXX-INSPIRED 3-LANE FALLING SQL GAME)
+    // 11B. SQL BLOCK GAME ENGINE (3-LANE FALLING SQL GAME)
     // =========================================================================
     const bgState = {
       running: false,
@@ -3722,7 +3732,6 @@ ORDER BY s.SID ASC;</textarea>
       document.getElementById('closeMobileDrawerBtn').addEventListener('click', () => document.getElementById('mobileDrawer').classList.add('hidden'));
       document.getElementById('refModalBtn').addEventListener('click', () => document.getElementById('refModal').classList.remove('hidden'));
       document.getElementById('closeRefModalBtn').addEventListener('click', () => document.getElementById('refModal').classList.add('hidden'));
-      document.getElementById('cmdPaletteBtn').addEventListener('click', openCmdPalette);
       document.getElementById('closeCmdBtn').addEventListener('click', closeCmdPalette);
       document.getElementById('cmdSearchInput').addEventListener('input', (e) => renderCmdResults(e.target.value));
       window.addEventListener('keydown', (e) => {
@@ -3734,9 +3743,6 @@ ORDER BY s.SID ASC;</textarea>
         state.soundOn = !state.soundOn;
         e.currentTarget.classList.toggle('text-[#10d981]', state.soundOn);
         e.currentTarget.classList.toggle('text-[#64748b]', !state.soundOn);
-      });
-      document.getElementById('resetProgressBtn').addEventListener('click', () => {
-        state.completed = {}; state.usedSolution = {}; state.xp = 0; state.penalty = 0; state.wrongCount = 0; state.currentLevelIdx = 0; saveProgress(); renderProgressWidgets(); renderSidebars(); loadLevel(0);
       });
 
       document.getElementById('prevLevelBtn').addEventListener('click', () => { if (state.currentLevelIdx > 0) loadLevel(state.currentLevelIdx - 1); });
