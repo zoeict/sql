@@ -309,7 +309,6 @@
             <div class="mt-1.5 flex items-center gap-2 font-mono-code text-[10px]">
               <span id="penaltyReadout" class="text-[#ff66a8] font-bold">扣分: 0</span>
               <span class="text-[#324052]">|</span>
-              <span id="teacherModeTag" class="hidden text-[#00e5ff] font-bold">教師模式</span>
               <span id="savedIndicator" class="text-[#10d981]">● 已儲存</span>
             </div>
           </div>
@@ -1096,38 +1095,38 @@ ORDER BY s.SID ASC;</textarea>
 
   <!-- HKDSE Official SQL & ERD Reference Modal -->
   
-  <!-- Student Gmail Login & Progress Persistence Modal -->
-  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
-    <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto chassis-surface rounded-sm p-5 shadow-2xl space-y-4 border-[#324052]">
+  <!-- Student Gmail Login Modal (Strict Student Mode) -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="w-full max-w-md chassis-surface rounded-sm p-5 shadow-2xl space-y-4 border-[#324052]">
       <div class="flex items-center justify-between border-b border-[#212a36] pb-3">
         <div>
           <div class="font-mono-code text-[10px] text-[#00e5ff] font-bold tracking-widest uppercase">STUDENT GMAIL LOGIN</div>
-          <h3 class="font-display text-lg font-bold text-white">學生 Gmail 登入與進度同步</h3>
+          <h3 class="font-display text-lg font-bold text-white">學生 Gmail 登入</h3>
         </div>
-        <button id="closeLoginModalBtn" class="hw-btn p-1.5 rounded-sm bg-[#141b25] text-slate-300 border border-[#2a3647]" title="關閉">
+        <button id="closeLoginModalBtn" class="hidden hw-btn p-1.5 rounded-sm bg-[#141b25] text-slate-300 border border-[#2a3647]" title="關閉">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
       <p class="text-xs text-[#9aa7b8] leading-relaxed">
-        請以學校 Gmail（或個人 Gmail）及班別學號登入。系統會自動記錄你嘅 8 課進度、得分、扣分同積木遊戲分數；老師接駁 Google Sheet 後，全班進度會即時同步至老師總表。
+        請輸入你嘅學校 Gmail（或個人 Gmail）、班別、學號及姓名登入。完成每課 10/10 題先會解鎖下一課，所有作答紀錄會自動同步至老師進度表。
       </p>
 
       <div>
-        <label class="block text-[11px] font-bold text-[#00e5ff] mb-1">學生 Gmail（必填，用作進度識別與跟進）</label>
-        <input id="loginEmailInput" type="email" placeholder="例如：s202501@school.edu.hk 或 student@gmail.com"
+        <label class="block text-[11px] font-bold text-[#00e5ff] mb-1">學生 Gmail（必填）</label>
+        <input id="loginEmailInput" type="email" placeholder="例如：s202501@school.edu.hk"
           class="w-full rounded-sm bg-[#070a0e] border border-[#2a3647] focus:border-[#00e5ff] px-3 py-2 text-xs font-mono-code text-white outline-none" />
       </div>
 
       <div class="grid grid-cols-3 gap-2.5">
         <div>
           <label class="block text-[11px] font-bold text-[#cbd5e1] mb-1">班別</label>
-          <input id="loginClassInput" type="text" placeholder="5A" value="5A"
+          <input id="loginClassInput" type="text" placeholder="5A"
             class="w-full rounded-sm bg-[#070a0e] border border-[#2a3647] focus:border-[#00e5ff] px-3 py-2 text-xs font-mono-code text-white outline-none" />
         </div>
         <div>
           <label class="block text-[11px] font-bold text-[#cbd5e1] mb-1">學號</label>
-          <input id="loginNoInput" type="text" placeholder="01" value="01"
+          <input id="loginNoInput" type="text" placeholder="01"
             class="w-full rounded-sm bg-[#070a0e] border border-[#2a3647] focus:border-[#00e5ff] px-3 py-2 text-xs font-mono-code text-white outline-none" />
         </div>
         <div>
@@ -1137,35 +1136,11 @@ ORDER BY s.SID ASC;</textarea>
         </div>
       </div>
 
-      <label class="flex items-center gap-2 text-xs text-[#cbd5e1] bg-[#070a0e] border border-[#1b2430] p-2.5 rounded-sm cursor-pointer">
-        <input id="loginTeacherToggle" type="checkbox" class="accent-[#00e5ff]" />
-        <span><strong>教師檢視模式</strong>（解鎖全部 8 課 80 題以便備課或示範；學生練習請勿勾選）</span>
-      </label>
-
       <div id="loginErrorMsg" class="hidden text-xs font-bold text-[#ff66a8]"></div>
 
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-        <button id="loginQuickGuestBtn" class="hw-btn px-3 py-2 rounded-sm bg-[#141b25] border border-[#2a3647] text-xs font-bold text-[#9aa7b8] hover:text-white">
-          體驗帳號登入
-        </button>
-        <button id="loginSubmitBtn" class="hw-btn hw-btn-primary px-5 py-2 rounded-sm text-xs sm:text-sm font-bold">
-          以 Gmail 登入並載入進度
-        </button>
-      </div>
-
-      <!-- Teacher Cloud Sync Endpoint & Export/Import -->
-      <div class="pt-3 border-t border-[#212a36] space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="font-mono-code text-[10px] text-[#f5a623] font-bold">進度備份碼（免後端跨裝置還原）</span>
-          <div class="flex gap-1.5">
-            <button id="exportProgressBtn" class="hw-btn px-2.5 py-1 rounded-sm bg-[#141b25] border border-[#2a3647] text-[11px] font-bold text-[#00e5ff]">匯出進度碼</button>
-            <button id="importProgressBtn" class="hw-btn px-2.5 py-1 rounded-sm bg-[#141b25] border border-[#2a3647] text-[11px] font-bold text-[#10d981]">匯入還原</button>
-          </div>
-        </div>
-        <textarea id="progressCodeBox" rows="2" placeholder="按「匯出進度碼」產生備份碼，或貼上進度碼按「匯入還原」..."
-          class="w-full rounded-sm bg-[#06080c] border border-[#1b2430] p-2 text-[11px] font-mono-code text-[#cbd5e1] outline-none"></textarea>
-        <div id="backupStatusMsg" class="text-[11px] text-[#10d981] font-bold hidden"></div>
-      </div>
+      <button id="loginSubmitBtn" class="w-full hw-btn hw-btn-primary px-5 py-2.5 rounded-sm text-xs sm:text-sm font-bold">
+        登入並開始練習
+      </button>
     </div>
   </div>
 
@@ -1348,7 +1323,7 @@ ORDER BY s.SID ASC;</textarea>
       blockBestScore: 0,
       predictRows: 3,
       erdShowResolved: false,
-      student: null, // { id, cls, no, name, teacherMode }
+      student: null, // { id, email, cls, no, name }
       openChapters: { 1: true }
     };
 
@@ -1454,13 +1429,10 @@ ORDER BY s.SID ASC;</textarea>
 
     function updateStudentHeaderUI() {
       const lbl = document.getElementById('headerStudentLabel');
-      const tTag = document.getElementById('teacherModeTag');
       if (state.student) {
         lbl.textContent = `${state.student.cls}-${state.student.no} ${state.student.name}`;
-        if (tTag) tTag.classList.toggle('hidden', !state.student.teacherMode);
       } else {
         lbl.textContent = '請先登入';
-        if (tTag) tTag.classList.add('hidden');
       }
     }
 
@@ -1472,7 +1444,6 @@ ORDER BY s.SID ASC;</textarea>
 
     function isChapterUnlocked(chNum) {
       if (chNum <= 1) return true;
-      if (state.student && state.student.teacherMode) return true;
       return getChapterStats(chNum - 1).cleared;
     }
 
@@ -3509,19 +3480,21 @@ ORDER BY s.SID ASC;</textarea>
     // 11C. STUDENT LOGIN & PROGRESS BACKUP MODAL
     // =========================================================================
     function openLoginModal() {
+      const closeBtn = document.getElementById('closeLoginModalBtn');
       if (state.student) {
         document.getElementById('loginEmailInput').value = state.student.email || '';
-        document.getElementById('loginClassInput').value = state.student.cls || '5A';
-        document.getElementById('loginNoInput').value = state.student.no || '01';
+        document.getElementById('loginClassInput').value = state.student.cls || '';
+        document.getElementById('loginNoInput').value = state.student.no || '';
         document.getElementById('loginNameInput').value = state.student.name || '';
-        document.getElementById('loginTeacherToggle').checked = Boolean(state.student.teacherMode);
+        if (closeBtn) closeBtn.classList.remove('hidden');
+      } else {
+        if (closeBtn) closeBtn.classList.add('hidden');
       }
       document.getElementById('loginErrorMsg').classList.add('hidden');
-      document.getElementById('backupStatusMsg').classList.add('hidden');
       document.getElementById('loginModal').classList.remove('hidden');
     }
 
-    function handleStudentLogin(email, cls, no, name, teacherMode) {
+    function handleStudentLogin(email, cls, no, name) {
       const cleanEmail = (email || '').trim().toLowerCase();
       const cleanCls = (cls || '').trim().toUpperCase();
       const cleanNo = (no || '').trim().padStart(2, '0');
@@ -3545,7 +3518,7 @@ ORDER BY s.SID ASC;</textarea>
       }
       errEl.classList.add('hidden');
       const id = cleanEmail.replace(/[^a-z0-9]/g, '_');
-      const studentObj = { id, email: cleanEmail, cls: cleanCls, no: cleanNo, name: cleanName, teacherMode: Boolean(teacherMode) };
+      const studentObj = { id, email: cleanEmail, cls: cleanCls, no: cleanNo, name: cleanName };
       loadStudentProfile(studentObj);
       document.getElementById('loginModal').classList.add('hidden');
       playSuccessChime();
@@ -3619,63 +3592,18 @@ ORDER BY s.SID ASC;</textarea>
         document.getElementById('normHintBox').classList.toggle('hidden');
       });
 
-      // Student Login & Backup listeners
+      // Student Login listeners (strict Gmail required, no guest/teacher bypass)
       document.getElementById('studentProfileBtn').addEventListener('click', openLoginModal);
       document.getElementById('closeLoginModalBtn').addEventListener('click', () => {
-        if (!state.student) {
-          handleStudentLogin('demo.5a01@gmail.com', '5A', '01', 'Demo Student', false);
-        } else {
-          document.getElementById('loginModal').classList.add('hidden');
-        }
+        if (state.student) document.getElementById('loginModal').classList.add('hidden');
       });
       document.getElementById('loginSubmitBtn').addEventListener('click', () => {
         handleStudentLogin(
           document.getElementById('loginEmailInput').value,
           document.getElementById('loginClassInput').value,
           document.getElementById('loginNoInput').value,
-          document.getElementById('loginNameInput').value,
-          document.getElementById('loginTeacherToggle').checked
+          document.getElementById('loginNameInput').value
         );
-      });
-      document.getElementById('loginQuickGuestBtn').addEventListener('click', () => {
-        handleStudentLogin('demo.5a01@gmail.com', '5A', '01', 'Demo Student', document.getElementById('loginTeacherToggle').checked);
-      });
-      document.getElementById('exportProgressBtn').addEventListener('click', () => {
-        const payload = {
-          student: state.student,
-          completed: state.completed,
-          usedSolution: state.usedSolution,
-          xp: state.xp,
-          penalty: state.penalty,
-          wrongCount: state.wrongCount,
-          currentLevelIdx: state.currentLevelIdx,
-          blockBestScore: state.blockBestScore
-        };
-        const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-        const box = document.getElementById('progressCodeBox');
-        box.value = code;
-        box.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        const msg = document.getElementById('backupStatusMsg');
-        msg.textContent = '✓ 已產生並複製進度碼！貼到其他裝置即可還原。';
-        msg.classList.remove('hidden');
-      });
-      document.getElementById('importProgressBtn').addEventListener('click', () => {
-        const msg = document.getElementById('backupStatusMsg');
-        try {
-          const code = document.getElementById('progressCodeBox').value.trim();
-          const payload = JSON.parse(decodeURIComponent(escape(atob(code))));
-          if (!payload.student || !payload.student.id) throw new Error('格式不正確');
-          localStorage.setItem(getStudentStorageKey(payload.student.id), JSON.stringify(payload));
-          loadStudentProfile(payload.student);
-          msg.textContent = `✓ 成功還原 ${payload.student.cls}-${payload.student.no} ${payload.student.name} 嘅進度！`;
-          msg.className = 'text-[11px] text-[#10d981] font-bold';
-          msg.classList.remove('hidden');
-        } catch (e) {
-          msg.textContent = '✗ 進度碼無效，請檢查有否貼漏字元。';
-          msg.className = 'text-[11px] text-[#ff66a8] font-bold';
-          msg.classList.remove('hidden');
-        }
       });
 
       // SQL Block Game listeners
@@ -3868,9 +3796,12 @@ ORDER BY s.SID ASC;</textarea>
       if (savedUser && savedUser.id) {
         loadStudentProfile(savedUser);
       } else {
-        // Load preview state cleanly and prompt student to log in
-        state.student = { id: 'demo_5a01_gmail_com', email: 'demo.5a01@gmail.com', cls: '5A', no: '01', name: 'Demo Student', teacherMode: false };
-        loadStudentProfile(state.student);
+        state.student = null;
+        updateStudentHeaderUI();
+        renderProgressWidgets();
+        renderSidebars();
+        renderHomeRoadmap();
+        loadLevel(0);
         openLoginModal();
       }
       switchMode('home');
