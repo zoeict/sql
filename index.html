@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SQL LAB</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -1165,26 +1166,40 @@ ORDER BY s.SID ASC;</textarea>
 
   <!-- HKDSE Official SQL & ERD Reference Modal -->
   
-  <!-- Student Gmail Login Modal (Strict Student Mode) -->
+  <!-- Student Google OAuth Login Modal -->
   <div id="loginModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-3">
     <div class="w-full max-w-md chassis-surface rounded-sm p-5 shadow-2xl space-y-4 border-[#324052]">
       <div class="flex items-center justify-between border-b border-[#212a36] pb-3">
-        <div>
-          <h3 class="font-display text-lg font-bold text-white">學生 Gmail 登入</h3>
-        </div>
+        <h3 class="font-display text-lg font-bold text-white">學生登入（Gmail 認證）</h3>
         <button id="closeLoginModalBtn" class="hidden hw-btn p-1.5 rounded-sm bg-[#141b25] text-slate-300 border border-[#2a3647]" title="關閉">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <p class="text-xs text-[#9aa7b8]">請輸入 Gmail、班別、學號及姓名登入以記錄進度。</p>
-
-      <div>
-        <label class="block text-[11px] font-bold text-[#00e5ff] mb-1">學生 Gmail（必填）</label>
-        <input id="loginEmailInput" type="email" placeholder="例如：s202501@school.edu.hk"
-          class="w-full rounded-sm bg-[#070a0e] border border-[#2a3647] focus:border-[#00e5ff] px-3 py-2 text-xs font-mono-code text-white outline-none" />
+      <!-- Step 1: Google Sign-In Section -->
+      <div id="googleSignInSection" class="space-y-3">
+        <p class="text-xs text-[#9aa7b8]">請先使用你嘅學校或個人 Google 帳戶認證登入。</p>
+        <div id="googleBtnWrap" class="flex justify-center min-h-[44px] items-center"></div>
+        <div id="gmailFallbackNote" class="hidden space-y-2 pt-2 border-t border-[#1b2430]">
+          <div class="text-[11px] text-[#f5a623]">目前預覽環境未載入 Google 驗證按鈕，可暫時輸入 Gmail 測試（上載 GitHub Pages 後會自動顯示官方 Google 登入掣）：</div>
+          <input id="loginEmailInput" type="email" placeholder="例如：s202501@school.edu.hk"
+            class="w-full rounded-sm bg-[#070a0e] border border-[#2a3647] focus:border-[#00e5ff] px-3 py-2 text-xs font-mono-code text-white outline-none" />
+        </div>
       </div>
 
+      <!-- Verified Google Profile Banner -->
+      <div id="googleSignedBox" class="hidden flex items-center justify-between gap-3 bg-[#0b1f1a] border border-[#10d981]/45 rounded-sm p-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img id="gmailAvatarImg" src="" alt="" class="hidden w-9 h-9 rounded-full border border-[#10d981]/60 shrink-0" />
+          <div class="min-w-0">
+            <div id="gmailNameText" class="text-xs font-bold text-white truncate"></div>
+            <div id="gmailEmailText" class="text-[11px] font-mono-code text-[#34d399] truncate"></div>
+          </div>
+        </div>
+        <button id="switchGoogleBtn" type="button" class="text-[11px] text-[#9aa7b8] hover:text-white underline shrink-0">切換帳戶</button>
+      </div>
+
+      <!-- Step 2: Class, No, Name -->
       <div class="grid grid-cols-3 gap-2.5">
         <div>
           <label class="block text-[11px] font-bold text-[#cbd5e1] mb-1">班別</label>
@@ -1203,10 +1218,11 @@ ORDER BY s.SID ASC;</textarea>
         </div>
       </div>
 
+      <div id="loginCloudStatus" class="hidden text-[11px] font-bold text-[#00e5ff]"></div>
       <div id="loginErrorMsg" class="hidden text-xs font-bold text-[#ff66a8]"></div>
 
       <button id="loginSubmitBtn" class="w-full hw-btn hw-btn-primary px-5 py-2.5 rounded-sm text-xs sm:text-sm font-bold">
-        登入並開始練習
+        確認並開始練習
       </button>
     </div>
   </div>
@@ -1370,6 +1386,7 @@ ORDER BY s.SID ASC;</textarea>
     // =========================================================================
     const CLOUD_SYNC_CONFIG = {
       appsScriptUrl: 'https://script.google.com/macros/s/AKfycbzXeGIoSFHFurWcB0NgbanlrSJ0iUH8lgI3T5hPFWqImkA72Ba_9ROx_-zMYQlt26cV/exec',
+      googleClientId: '13333491283-9l610elv8e5vqglneb26nq9risf8i11a.apps.googleusercontent.com',
       allowedDomain: ''
     };
 
@@ -3789,10 +3806,89 @@ ORDER BY s.SID ASC;</textarea>
 
     // 11C. STUDENT LOGIN & PROGRESS BACKUP MODAL
     // =========================================================================
+    let pendingGoogleUser = null;
+
+    function decodeJwtPayload(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) { return null; }
+    }
+
+    function renderGoogleLoginUI() {
+      const signedBox = document.getElementById('googleSignedBox');
+      const signInSec = document.getElementById('googleSignInSection');
+      const fallbackNote = document.getElementById('gmailFallbackNote');
+      const user = pendingGoogleUser || (state.student && state.student.verifiedGoogle ? state.student : null);
+
+      if (user && user.email && user.verifiedGoogle) {
+        signedBox.classList.remove('hidden');
+        signInSec.classList.add('hidden');
+        document.getElementById('gmailNameText').textContent = user.name || user.email;
+        document.getElementById('gmailEmailText').textContent = user.email;
+        const img = document.getElementById('gmailAvatarImg');
+        if (user.picture) { img.src = user.picture; img.classList.remove('hidden'); }
+        else img.classList.add('hidden');
+        if (!document.getElementById('loginNameInput').value && user.name) {
+          document.getElementById('loginNameInput').value = user.name;
+        }
+      } else {
+        signedBox.classList.add('hidden');
+        signInSec.classList.remove('hidden');
+        const cid = CLOUD_SYNC_CONFIG.googleClientId;
+        if (cid && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          fallbackNote.classList.add('hidden');
+          const wrap = document.getElementById('googleBtnWrap');
+          wrap.innerHTML = '';
+          google.accounts.id.initialize({
+            client_id: cid,
+            callback: handleGoogleCredentialResponse
+          });
+          google.accounts.id.renderButton(wrap, { theme: 'filled_blue', size: 'large', width: 320, text: 'signin_with', locale: 'zh_HK' });
+        } else {
+          document.getElementById('googleBtnWrap').innerHTML = '';
+          fallbackNote.classList.remove('hidden');
+          if (state.student && state.student.email) {
+            document.getElementById('loginEmailInput').value = state.student.email;
+          }
+        }
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const errEl = document.getElementById('loginErrorMsg');
+      const stEl = document.getElementById('loginCloudStatus');
+      errEl.classList.add('hidden');
+      const info = decodeJwtPayload(response.credential);
+      if (!info || !info.email) {
+        errEl.textContent = 'Google 認證失敗，請重試。';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      const cleanEmail = String(info.email).trim().toLowerCase();
+      if (CLOUD_SYNC_CONFIG.allowedDomain && !cleanEmail.endsWith('@' + CLOUD_SYNC_CONFIG.allowedDomain.toLowerCase())) {
+        errEl.textContent = `只限使用 @${CLOUD_SYNC_CONFIG.allowedDomain} 學校帳戶登入！`;
+        errEl.classList.remove('hidden');
+        return;
+      }
+      pendingGoogleUser = {
+        email: cleanEmail,
+        name: info.name || '',
+        picture: info.picture || '',
+        verifiedGoogle: true
+      };
+      if (pendingGoogleUser.name) document.getElementById('loginNameInput').value = pendingGoogleUser.name;
+      renderGoogleLoginUI();
+      stEl.textContent = '✓ Gmail 認證成功！請填寫班別及學號並按「確認並開始練習」。';
+      stEl.classList.remove('hidden');
+      playSuccessChime();
+    }
+
     function openLoginModal() {
       const closeBtn = document.getElementById('closeLoginModalBtn');
       if (state.student) {
-        document.getElementById('loginEmailInput').value = state.student.email || '';
         document.getElementById('loginClassInput').value = state.student.cls || '';
         document.getElementById('loginNoInput').value = state.student.no || '';
         document.getElementById('loginNameInput').value = state.student.name || '';
@@ -3801,18 +3897,27 @@ ORDER BY s.SID ASC;</textarea>
         if (closeBtn) closeBtn.classList.add('hidden');
       }
       document.getElementById('loginErrorMsg').classList.add('hidden');
+      document.getElementById('loginCloudStatus').classList.add('hidden');
       document.getElementById('loginModal').classList.remove('hidden');
+      renderGoogleLoginUI();
+      // Retry rendering Google button briefly if gsi/client is still async loading
+      setTimeout(() => {
+        if (!document.getElementById('loginModal').classList.contains('hidden') && !pendingGoogleUser) {
+          renderGoogleLoginUI();
+        }
+      }, 900);
     }
 
     function handleStudentLogin(email, cls, no, name) {
-      const cleanEmail = (email || '').trim().toLowerCase();
+      const activeGoogle = pendingGoogleUser || (state.student && state.student.verifiedGoogle ? state.student : null);
+      const cleanEmail = (activeGoogle ? activeGoogle.email : (email || '')).trim().toLowerCase();
       const cleanCls = (cls || '').trim().toUpperCase();
       const cleanNo = (no || '').trim().padStart(2, '0');
       const cleanName = (name || '').trim();
       const errEl = document.getElementById('loginErrorMsg');
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-        errEl.textContent = '請輸入有效嘅學生 Gmail（例如 student@gmail.com 或學校電郵）！';
+        errEl.textContent = '請先點擊上方「使用 Google 帳戶登入」完成 Gmail 認證！';
         errEl.classList.remove('hidden');
         return;
       }
@@ -3822,13 +3927,22 @@ ORDER BY s.SID ASC;</textarea>
         return;
       }
       if (!cleanCls || !cleanNo || !cleanName) {
-        errEl.textContent = '請填妥班別、學號及姓名先可以記錄進度！';
+        errEl.textContent = '請填妥班別、學號及姓名！';
         errEl.classList.remove('hidden');
         return;
       }
       errEl.classList.add('hidden');
       const id = cleanEmail.replace(/[^a-z0-9]/g, '_');
-      const studentObj = { id, email: cleanEmail, cls: cleanCls, no: cleanNo, name: cleanName };
+      const studentObj = {
+        id,
+        email: cleanEmail,
+        cls: cleanCls,
+        no: cleanNo,
+        name: cleanName,
+        picture: activeGoogle ? (activeGoogle.picture || '') : '',
+        verifiedGoogle: Boolean(activeGoogle && activeGoogle.verifiedGoogle)
+      };
+      pendingGoogleUser = null;
       loadStudentProfile(studentObj);
       document.getElementById('loginModal').classList.add('hidden');
       playSuccessChime();
@@ -3921,6 +4035,12 @@ ORDER BY s.SID ASC;</textarea>
       document.getElementById('studentProfileBtn').addEventListener('click', openLoginModal);
       document.getElementById('closeLoginModalBtn').addEventListener('click', () => {
         if (state.student) document.getElementById('loginModal').classList.add('hidden');
+      });
+      document.getElementById('switchGoogleBtn').addEventListener('click', () => {
+        pendingGoogleUser = null;
+        if (state.student) state.student.verifiedGoogle = false;
+        document.getElementById('loginCloudStatus').classList.add('hidden');
+        renderGoogleLoginUI();
       });
       document.getElementById('loginSubmitBtn').addEventListener('click', () => {
         handleStudentLogin(
